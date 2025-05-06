@@ -280,7 +280,7 @@ func _to_string():
 	var obj = to_object()
 	return JSON.stringify(obj)
 
-func trigger(event: String, argv = [], path: PackedStringArray = PackedStringArray(), target = self):
+func trigger(event: String, argv: Array = [], path: PackedStringArray = PackedStringArray(), target: Object = self):
 	var path_copy = PackedStringArray(path)
 	path_copy.reverse()
 	var path_str = '/'.join(path_copy) + ":" + event

@@ -48,6 +48,7 @@ class ReflectionType extends Schema:
 	static func define_fields():
 		return [
 			Schema.Field.new("id", Schema.Types.NUMBER),
+			Schema.Field.new("extendsId", Schema.Types.NUMBER),
 			Schema.Field.new("fields", Schema.Types.ARRAY, ReflectionField),
 		]
 	

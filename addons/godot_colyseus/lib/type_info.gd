@@ -89,4 +89,3 @@ func decode(decoder: Decoder):
 			return decoder.reader.get_double()
 		_:
 			assert(true) #,str("Unkown support type:", type))
-

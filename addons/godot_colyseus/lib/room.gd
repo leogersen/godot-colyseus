@@ -6,6 +6,7 @@ const ser = preload("res://addons/godot_colyseus/lib/serializer.gd")
 const Decoder = preload("res://addons/godot_colyseus/lib/decoder.gd")
 const Encoder = preload("res://addons/godot_colyseus/lib/encoder.gd")
 const MsgPack = preload("res://addons/godot_colyseus/lib/msgpack.gd")
+const Schema = preload("./schema.gd")
 
 const CODE_HANDSHAKE = 9
 const CODE_JOIN_ROOM = 10
@@ -188,5 +189,6 @@ func leave(consented = true):
 	else:
 		on_leave.emit()
 
-func get_state():
+var state : Schema : get = get_state
+func get_state() -> Schema:
 	return serializer.get_state()

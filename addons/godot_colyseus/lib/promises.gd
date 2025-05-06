@@ -31,16 +31,22 @@ class Promise:
 		_state = State.Failed
 		emit_signal("completed")
 	
+	var data:get = get_data
 	func get_data():
 		if _state == State.Success:
 			return result
 		return null
 	
+	var error:get = get_error
 	func get_error():
 		if _state == State.Failed:
 			return result
 		return null
 	
+	var is_failed : bool :
+		get():
+			return _state == State.Failed
+			
 	func wait():
 		if _state == State.Waiting:
 			await self.completed
