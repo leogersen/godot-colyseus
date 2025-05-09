@@ -14,6 +14,12 @@ func _init(type: String,sub_type = null):
 func is_schema_type():
 	return type == types.REF or type == types.MAP or type == types.ARRAY or type == types.COLLECTION or type == types.SET
 
+func _to_string():
+	var ret = type
+	if sub_type and sub_type.type != types.REF:
+		ret = str(ret, ':', sub_type.type)
+	return ret
+
 func create():
 	match type:
 		types.REF:

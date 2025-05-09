@@ -51,4 +51,4 @@ func trigger(event: String, argv: Array = [], path: PackedStringArray = PackedSt
 	parent.trigger(event, argv, path, target)
 
 func to_object():
-	assert(false)
+	return "<null>"

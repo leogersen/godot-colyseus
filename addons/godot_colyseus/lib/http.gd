@@ -93,9 +93,13 @@ class Response:
 var _old_status
 
 func _init(server: String):
+	var url = parseUrl(server)
+	_client_promise = promises.RunPromise.new(Callable(self, "_setup"), [url.host, url.port, url.ssl]);
+
+static func parseUrl(url) -> Dictionary:
 	var regex = RegEx.new()
 	regex.compile("(\\w+):\\/\\/([^\\/:]+)(:(\\d+))?")
-	var result = regex.search(server)
+	var result = regex.search(url)
 	var scheme = result.get_string(1)
 	var ssl = scheme == "https"
 	var host = result.get_string(2)
@@ -103,11 +107,17 @@ func _init(server: String):
 	var port = -1
 	if portstr != "":
 		port = int(portstr)
-	_client_promise = promises.RunPromise.new(Callable(self, "_setup"), [host, port, ssl]);
+	return {
+		"host": host,
+		"ssl": ssl,
+		"port": port,
+	}
 
+var host: String
 func _setup(promise: promises.Promise, host, port, ssl):
 	var client = HTTPClient.new()
-	var error = client.connect_to_host(host, port, null)
+	self.host = host
+	var error = client.connect_to_host(host, port, TLSOptions.client() if ssl else null)
 	if error != OK:
 		promise.reject(str("ErrorCode: ", error))
 	var root = Engine.get_main_loop()
@@ -180,6 +190,35 @@ func _request(promise: Promise, request: RequestInfo):
 				return 
 	pass
 
+func _resolve(promise: Promise, request: RequestInfo, response: Response):
+	if response.status_code() == 301:
+		var new_request = RequestInfo.new(request.method, request.path)
+		new_request.headers = request.headers
+		new_request.body = request.body
+		
+		var path: String = response.headers()["Location"]
+		if path.begins_with("http://") or path.begins_with("https://"):
+			var idx = path.find('/', 8)
+			var host
+			if idx >= 0:
+				host = path.substr(0, idx)
+				path = path.substr(idx)
+			else:
+				host = path
+				path = '/'
+			var url = parseUrl(host)
+			if url.host != self.host:
+				printerr("Cannot connect to new host ", host, self.host)
+				promise.resolve(response)
+				return
+		else:
+			new_request.path = path
+		
+		promise.resolve(fetch(new_request))
+		pass
+	else:
+		promise.resolve(response)
+
 func fetch(request = null) -> Promise:
 	if request == null:
 		request = RequestInfo.new()
@@ -187,4 +226,4 @@ func fetch(request = null) -> Promise:
 		var path = request
 		request = RequestInfo.new()
 		request.path = path
-	return RunPromise.new(Callable(self, "_request"), [request])
+	return RunPromise.new(_request, [request])

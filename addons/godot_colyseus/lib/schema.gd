@@ -17,7 +17,7 @@ class Field:
 	var index: int
 	var name: String
 	var value
-	var current_type
+	var current_type: TypeInfo
 	
 	func _init(name: String,type: String,schema_type = null):
 		current_type = TypeInfo.new(type)
@@ -31,6 +31,12 @@ class Field:
 		elif schema_type is TypeInfo:
 			current_type.sub_type = schema_type
 		self.name = name
+	
+	func _to_string():
+		if current_type:
+			return current_type.to_string()
+		else:
+			return 'null'
 
 var _fields: Array = []
 var _field_index = {}
@@ -71,7 +77,7 @@ func _set(property, value):
 # path format {path}:{action}
 # {action} is one of:
 #	add  		Create sub object, paramaters [current, new_value, key]
-#	remove_at		Delete sub object， paramaters [current, old_value, key]
+#	remove		Delete sub object， paramaters [current, old_value, key]
 #	replace		Replace sub object， paramaters [current, new_value, key]
 #	delete		Current object is deleted, paramaters [current]
 #	create		Current object is created, paramaters [current]
@@ -170,6 +176,10 @@ func decode(decoder: Decoder) -> int:
 				key = ref_value.meta_get_key(field_index)
 			
 			if operation == OP.DELETE:
+				if ref.type_info.type == Types.MAP:
+					key = ref_value.meta_get_key(field_index)
+					print("Remove map key ", field_index, ":", key)
+					old = ref_value.meta_get(field_index)
 				ref_value.meta_remove(field_index)
 			else:
 				if ref.type_info.type == Types.MAP:
@@ -188,7 +198,7 @@ func decode(decoder: Decoder) -> int:
 					new = type.decode(decoder)
 			
 			if old != new:
-				
+				print("change ", key, ":", old, "-", new)
 				if old == null:
 					changes.append({
 						target = ref_value,
@@ -198,7 +208,7 @@ func decode(decoder: Decoder) -> int:
 				elif new == null:
 					changes.append({
 						target = ref_value,
-						event = "remove_at",
+						event = "remove",
 						argv = [old, key]
 					})
 				else:

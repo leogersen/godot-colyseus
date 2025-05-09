@@ -64,11 +64,13 @@ class MapSchema extends Collection:
 		_counter = 0
 
 	func meta_get(index):
-		if _keys.size() > index:
+		if _keys.has(index):
 			return items[_keys[index]]
 		return null
 
 	func meta_get_key(index):
+		if not _keys.has(index):
+			return index
 		return _keys[index]
 
 	func meta_set(index, key, value):

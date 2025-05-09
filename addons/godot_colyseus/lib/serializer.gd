@@ -36,7 +36,10 @@ class ReflectionField extends Schema:
 		]
 	
 	func test(field, reflection: Reflection) -> bool:
-		if self.type != field.current_type.type or self.name != field.name:
+		if self.type != field.current_type.to_string() or self.name != field.name:
+			var str1 = str(field.name, '-', self.name)
+			var str2 = str(field.current_type, '-', self.type)
+			printerr("Field not match ", str1, " : ", str2)
 			return false
 		if self.type == Schema.Types.REF:
 			var type = reflection.types.at(self.referenced_type)
@@ -54,10 +57,12 @@ class ReflectionType extends Schema:
 	
 	func test(schema_type, reflection: Reflection) -> bool:
 		if not schema_type is GDScript:
+			printerr("Type schema_type not match ", self.id)
 			return false
 		var fields = schema_type.define_fields()
 		var length = fields.size()
 		if length != self.fields.size():
+			printerr("Type fields count not match ", self.id)
 			return false
 		for i in range(length):
 			var field = self.fields.at(i)
@@ -87,7 +92,7 @@ class SchemaSerializer extends Serializer:
 	func handshake(decoder):
 		var reflection = Reflection.new()
 		reflection.decode(decoder)
-		assert(reflection.test(schema_type)) #,"Can not detect schema type")
+		assert(reflection.test(schema_type),"Can not detect schema type")
 	
 	func set_state(decoder):
 		state.decode(decoder)
