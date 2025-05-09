@@ -178,8 +178,6 @@ func decode(decoder: Decoder) -> int:
 			if operation == OP.DELETE:
 				if ref.type_info.type == Types.MAP:
 					key = ref_value.meta_get_key(field_index)
-					print("Remove map key ", field_index, ":", key)
-					old = ref_value.meta_get(field_index)
 				ref_value.meta_remove(field_index)
 			else:
 				if ref.type_info.type == Types.MAP:
