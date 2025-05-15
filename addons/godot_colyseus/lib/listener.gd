@@ -47,7 +47,14 @@ func _on_event(data, promise: ps.Promise):
 
 func emit(argv: Array = []):
 	var willremove = []
-	for cb in cbs:
+	var size = cbs.size()
+	for i in range(size):
+		var cb = cbs[i]
+		if !is_instance_valid(cb):
+			cbs.remove_at(i)
+			i -= 1
+			size -= 1
+			continue
 		cb.emit(argv)
 		if cb.once:
 			willremove.append(cb)

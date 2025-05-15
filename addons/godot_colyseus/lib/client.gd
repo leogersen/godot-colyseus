@@ -78,6 +78,9 @@ func _create_match_make_request(
 		return
 	var res: HTTP.Response = resp.get_data()
 	var response = res.json()
+	if response == null:
+		promise.reject("Server unreadable!")
+		return
 	
 	if response.get('code') != null:
 		promise.reject(response['error'])

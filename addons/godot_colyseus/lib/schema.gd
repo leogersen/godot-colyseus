@@ -196,7 +196,6 @@ func decode(decoder: Decoder) -> int:
 					new = type.decode(decoder)
 			
 			if old != new:
-				print("change ", key, ":", old, "-", new)
 				if old == null:
 					changes.append({
 						target = ref_value,

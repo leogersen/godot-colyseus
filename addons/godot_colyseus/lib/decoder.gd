@@ -21,7 +21,7 @@ func read_utf8() -> String:
 	elif prefix == 0xdb:
 		length = reader.get_u32()
 	
-	return reader.get_string(length)
+	return reader.get_utf8_string(length)
 
 func number():
 	var prefix = reader.get_u8()

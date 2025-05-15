@@ -84,7 +84,7 @@ class MapSchema extends Collection:
 		_keys.erase(index)
 	
 	func at(key: String):
-		return items[key]
+		return items.get(key)
 	
 	func put(key: String, value):
 		_keys[_counter] = key
@@ -102,6 +102,12 @@ class MapSchema extends Collection:
 		for k in _keys:
 			list.append(_keys[k])
 		return list
+	
+	func size():
+		return _keys.size()
+		
+	func has(key: String):
+		return items.has(key)
 	
 class SetSchema extends Collection:
 	var _counter = 0
