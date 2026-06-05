@@ -4,6 +4,7 @@ extends RefCounted
 const Schema = preload("res://addons/godot_colyseus/lib/schema.gd")
 const Decoder = preload("res://addons/godot_colyseus/lib/decoder.gd")
 const Types = preload("res://addons/godot_colyseus/lib/types.gd")
+const TypeInfo = preload("res://addons/godot_colyseus/lib/type_info.gd")
 
 class Serializer:
 	
@@ -41,9 +42,22 @@ class ReflectionField extends Schema:
 			var str2 = str(field.current_type, '-', self.type)
 			printerr("Field not match ", str1, " : ", str2)
 			return false
-		if self.type == Schema.Types.REF:
+		var base_type = self.type.split(":")[0]
+		var uses_referenced_schema = base_type == Schema.Types.REF or (self.type.find(":") == -1 and (
+			base_type == Schema.Types.MAP or
+			base_type == Schema.Types.ARRAY or
+			base_type == Schema.Types.SET or
+			base_type == Schema.Types.COLLECTION
+		))
+		if uses_referenced_schema and self.referenced_type != null and self.referenced_type >= 0:
+			var schema_type = field.current_type.sub_type
+			if schema_type != null and schema_type is TypeInfo:
+				schema_type = schema_type.sub_type
+			if schema_type == null:
+				printerr("Missing referenced schema type for field ", self.name)
+				return false
 			var type = reflection.types.at(self.referenced_type)
-			return type.test(field.schema_type, reflection)
+			return type.test(schema_type, reflection)
 		return true
 
 class ReflectionType extends Schema:

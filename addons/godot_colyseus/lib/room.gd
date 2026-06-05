@@ -16,15 +16,18 @@ const CODE_ROOM_DATA = 13
 const CODE_ROOM_STATE = 14
 const CODE_ROOM_STATE_PATCH = 15
 const CODE_ROOM_DATA_SCHEMA = 16
+const CODE_ROOM_DATA_BYTES = 17
+const CODE_PING = 18
 
-const ERROR_MATCHMAKE_NO_HANDLER = 4210
-const ERROR_MATCHMAKE_INVALID_CRITERIA = 4211
-const ERROR_MATCHMAKE_INVALID_ROOM_ID = 4212
-const ERROR_MATCHMAKE_UNHANDLED = 4213
-const ERROR_MATCHMAKE_EXPIRED = 4214
+const ERROR_MATCHMAKE_NO_HANDLER = 520
+const ERROR_MATCHMAKE_INVALID_CRITERIA = 521
+const ERROR_MATCHMAKE_INVALID_ROOM_ID = 522
+const ERROR_MATCHMAKE_UNHANDLED = 523
+const ERROR_MATCHMAKE_EXPIRED = 524
 
-const ERROR_AUTH_FAILED = 4215
-const ERROR_APPLICATION_ERROR = 4216
+const ERROR_AUTH_FAILED = 525
+const ERROR_APPLICATION_ERROR = 526
+const ERROR_INVALID_PAYLOAD = 4217
 
 var room_name: String
 var room_id: String
@@ -140,6 +143,17 @@ func _on_data():
 			on_state_change.emit([serializer.get_state()])
 		CODE_ROOM_DATA_SCHEMA:
 			print("Receive message CODE_ROOM_DATA_SCHEMA")
+		CODE_ROOM_DATA_BYTES:
+			var type
+			if decoder.is_number():
+				type = str('i', decoder.number())
+			else:
+				type = decoder.read_utf8()
+			var listener = on_message(type, false)
+			if listener != null:
+				listener.emit([reader.data_array.slice(reader.get_position())])
+		CODE_PING:
+			send_raw([CODE_PING])
 
 func connect_remote(url: String):
 	var _url = url

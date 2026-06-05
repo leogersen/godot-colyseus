@@ -1,6 +1,7 @@
 extends RefCounted
 
 const Types = preload("res://addons/godot_colyseus/lib/types.gd")
+const SI_OP = preload("res://addons/godot_colyseus/lib/operations.gd")
 
 class Ref:
 	var value
@@ -28,7 +29,7 @@ func meta_get_key(index) -> String:
 func meta_get_subtype(index):
 	assert(false)
 
-func meta_set(index, key, value):
+func meta_set(index, key, value, operation = SI_OP.REPLACE):
 	assert(false)
 	return null
 

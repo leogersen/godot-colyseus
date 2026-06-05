@@ -32,7 +32,9 @@ func join_by_id(schema_type: GDScript, room_id: String, options: Dictionary = {}
 		_create_match_make_request, 
 		["joinById", room_id, options, schema_type])
 
-func reconnect(schema_type: GDScript, reconnection_token: String) -> Promise:
+func reconnect(schema_type: GDScript, reconnection_token: String, session_id: String = "") -> Promise:
+	if not session_id.is_empty():
+		reconnection_token = reconnection_token + ":" + session_id
 	var arr = reconnection_token.split(":")
 	if arr.size() == 2:
 		var room_id = arr[0]
@@ -85,11 +87,12 @@ func _create_match_make_request(
 	if response.get('code') != null:
 		promise.reject(response['error'])
 		return
-	var room = CRoom.new(response["room"]["name"], schema_type)
-	room.room_id = response["room"]["roomId"]
+	var room_data = response.get("room", response)
+	var room = CRoom.new(room_data["name"], schema_type)
+	room.room_id = room_data["roomId"]
 	room.session_id = response["sessionId"]
 	
-	room.connect_remote(_build_endpoint(response["room"], { "sessionId": room.session_id }))
+	room.connect_remote(_build_endpoint(room_data, { "sessionId": room.session_id }))
 	
 	room.on_join.once(Callable(self, "_room_joined"), [promise, room])
 	room.on_error.once(Callable(self, "_room_error"), [promise, room])
