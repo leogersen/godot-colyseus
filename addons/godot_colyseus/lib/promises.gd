@@ -52,7 +52,7 @@ class Promise:
 			await self.completed
 		return self
 
-	func _to_string():
+	func _to_string() -> String:
 		match _state:
 			State.Waiting:
 				return "[Waiting]"
@@ -60,6 +60,8 @@ class Promise:
 				return str("[Success:",result,"]")
 			State.Failed:
 				return str("[Failed:",result,"]")
+			_:
+				return "[Unknown]"
 	
 	func _next(promise, callback: Callable, argv: Array):
 		await wait()
